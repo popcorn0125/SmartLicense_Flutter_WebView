@@ -53,9 +53,57 @@ class _MyHomePageState extends State<MyHomePage> {
         // 현재 URL 가져오기
         String? currentUrl = await _controller.currentUrl();
 
+        // 오답노트에서 뒤로가기 클릭시 발생하는 부분
+        // if (currentUrl.contains('$cloudtypeURL/IncorrectNote?where')) {
+        //   _controller.goBack(); // 실제로 뒤로가기
+        //   // 뒤로간 페이지를 새로 로드
+        //   _controller.loadRequest(Uri.parse('$cloudtypeURL/MyHistoryPage'));
+        //   return false; // WillPopScope에서 기본 동작을 방지
+        // }
+
+        // 정보수정에서 비밀번호 입력하는 부분에서 뒤로가기 클릭시 발생하는 부분
+        if (currentUrl == '$cloudtypeURL/UserCheck') {
+          _controller.goBack(); // 실제로 뒤로가기
+          // 뒤로간 페이지를 새로 로드
+          _controller.loadRequest(Uri.parse('$cloudtypeURL/MyPage'));
+          return false; // WillPopScope에서 기본 동작을 방지
+        }
+
+        // 정보수정에서 뒤로가기 클릭시 발생하는 부분
+        if (currentUrl == '$cloudtypeURL/ChangeInfo') {
+          // 특정 URL에서만 모달창을 띄운다.
+          bool? shouldExit = await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('알림'),
+              content: Text('수정하신 정보가 저장되지 않습니다. 정말로 뒤로 가시겠습니까?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false); // '아니오' 선택 시 false 반환
+                  },
+                  child: Text('아니오'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true); // '예' 선택 시 true 반환
+                  },
+                  child: Text('예'),
+                ),
+              ],
+            ),
+          );
+          if (shouldExit == true) {
+            // 마이페이지를 새로 로드
+            _controller.loadRequest(Uri.parse('$cloudtypeURL/MyPage'));
+            return false; // WillPopScope에서 기본 동작을 방지
+          }
+          return false; // 기본 동작 방지
+        }
+
         if (canGoBack &&
-            (currentUrl == cloudtypeURL + '/PracticeMode' ||
-                currentUrl == cloudtypeURL + '/TestMode')) {
+            (currentUrl == '$cloudtypeURL/PracticeMode' ||
+                currentUrl == '$cloudtypeURL/TestMode')) {
           // 특정 URL에서만 모달창을 띄운다.
           bool? shouldExit = await showDialog(
             context: context,
@@ -81,8 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
           if (shouldExit == true) {
             _controller.goBack(); // 실제로 뒤로가기
             // 뒤로간 페이지를 새로 로드
-            _controller
-                .loadRequest(Uri.parse(cloudtypeURL + '/CategoryChoice'));
+            _controller.loadRequest(Uri.parse('$cloudtypeURL/CategoryChoice'));
             return false; // WillPopScope에서 기본 동작을 방지
           }
           return false; // 기본 동작 방지
